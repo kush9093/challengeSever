@@ -21,10 +21,10 @@ router.post("/auth", async (req, resp) => {
             const token = jwt.sign({userId:response.userId},process.env.SECRET_KEY,{expiresIn: "14d"})
             resp.json({ registered: true,data:response,token })
         } else {
-            resp.json({ registered: false,data:"password error" })
+            resp.status(401).json({ registered: false,data:"password error" })
         }
     } else {
-        resp.json({ registered: false })
+        resp.status(401).json({ registered: false })
     }
 
 

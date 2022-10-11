@@ -63,26 +63,26 @@ router.post("/getcompletedtodo",async (req,resp)=>{
 // todo 수정
 router.put("/updatetodo",async(req,resp)=>{
     try{
-        let response = await Todo.updateOne({_id:req.body.id},{$set:{comment:req.body.comment}});
+        let response = await Todo.updateOne({_id:req.body.id},{$set:{todoText:req.body.todoText}});
         resp.json({type:true,result:response});
     } catch(e){
-        resp.json({type:false,result:e})
+        resp.status(401).json({type:false,result:e})
     }
 })
 
 // todo 완료
 router.put("/completedtodo",async(req,resp)=>{
     try{
-        let response = await Todo.updateMany({_id:{$in:req.body.id}},{$set:{isEnd:req.body.isend}});
+        let response = await Todo.updateMany({_id:{$in:req.body.id}},{$set:{ing:req.body.ing}});
         resp.json({type:true,result:response});
     } catch(e){
-        resp.json({type:false,result:e})
+        resp.status(401).json({type:false,result:e})
     }
 })
 
 
 // todo 삭제
-router.delete("/deletetodo",async(req,resp)=>{
+router.post("/deletetodo",async(req,resp)=>{
     try{
         let response = await Todo.deleteMany({_id:{$in:req.body.id}});
         resp.json({type:true,result:"deleted todo"})
