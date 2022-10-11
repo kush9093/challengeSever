@@ -15,7 +15,7 @@ router.use((req, resp, next) => {
 
     try {
         const payload = jwt.verify(token, process.env.SECRET_KEY);
-        req.logonEmail = payload.email;
+        req.logonuserId = payload.userId;
     } catch (e) {
         console.log(e.message);
         return resp.status(401).json({ result: false, message: "invalid token" })

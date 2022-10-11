@@ -18,7 +18,7 @@ router.use((req, resp, next) => {
 
     try {
         const payload = jwt.verify(token, process.env.SECRET_KEY);
-        req.logonEmail = payload.email;
+        req.logonEmail = payload.userId;
     } catch (e) {
         console.log(e.message);
         return resp.status(401).json({ result: false, message: "invalid token" })
@@ -35,7 +35,7 @@ router.post("/addchallenge",async (req,resp)=>{
     try{
         let response = await Challenge.create({
             title:req.body.title,
-            createUser:req.body.email,
+            createUser:req.body.userId,
             isnotification : req.body.isnotification,
             hournotification : req.body.hournotification,
         })
@@ -48,7 +48,7 @@ router.post("/addchallenge",async (req,resp)=>{
 // 챌린지 전체 불러오기
 router.get("/readchallenge", async(req,resp)=>{
     try{
-        let response = await Challenge.find({createUser:req.query.email}).populate("data").sort("-createAt").lean();
+        let response = await Challenge.find({createUser:req.query.userId}).populate("data").sort("-createAt").lean();
         resp.json({type:true,result:response});
     } catch(e) {
         resp.json({type:false})

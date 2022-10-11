@@ -8,24 +8,24 @@ const router = express.Router();
 
 
 // auth token check middelware
-// router.use((req, resp, next) => {
-//     const authorization = req.get("Authorization");
-//     if (!authorization || !authorization.startsWith("Bearer")) {
-//         return resp.status(401).json({ result: false, message: "unauthorized error" })
-//     }
-//     const token = authorization.split(/\s/)[1];
+router.use((req, resp, next) => {
+    const authorization = req.get("Authorization");
+    if (!authorization || !authorization.startsWith("Bearer")) {
+        return resp.status(401).json({ result: false, message: "unauthorized error" })
+    }
+    const token = authorization.split(/\s/)[1];
 
-//     try {
-//         const payload = jwt.verify(token, process.env.SECRET_KEY);
-//         req.logonEmail = payload.email;
-//     } catch (e) {
-//         console.log(e.message);
-//         return resp.status(401).json({ result: false, message: "invalid token" })
-//     }
+    try {
+        const payload = jwt.verify(token, process.env.SECRET_KEY);
+        req.logonuserId = payload.userId;
+    } catch (e) {
+        console.log(e.message);
+        return resp.status(401).json({ result: false, message: "invalid token" })
+    }
 
-//     next()
+    next()
 
-// })
+})
 
 // 데이터 등록
 router.post("/adddata",async (req,resp)=>{
@@ -34,7 +34,7 @@ router.post("/adddata",async (req,resp)=>{
     let emoji = req.body.emoji;
     let comment = req.body.comment;
     let targetId = req.body.targetId;
-    let username = req.body.email;
+    let username = req.body.userId;
 
  //  data:URL
  !fs.existsSync(`public/${username}`) && fs.mkdirSync(`public/${username}`);

@@ -13,12 +13,12 @@ dotenv.config();
 
 // 로그인
 router.post("/auth", async (req, resp) => {
-    let response = await Account.findOne({ email: req.body.email })
+    let response = await Account.findOne({ userId: req.body.userId })
     if (response) {
         let pwd = await bcrypt.compare(req.body.password, response.password)
         if (pwd) {
             //===========================================================
-            const token = jwt.sign({email:response.email},process.env.SECRET_KEY,{expiresIn: "14d"})
+            const token = jwt.sign({userId:response.userId},process.env.SECRET_KEY,{expiresIn: "14d"})
             resp.json({ result: true,message:response,token })
         } else {
             resp.json({ result: false,message:"password error" })
@@ -33,12 +33,12 @@ router.post("/auth", async (req, resp) => {
 // 비밀번호 변경
 
 router.put("/changepassword",async(req,resp)=>{
-    let data = await Account.findOne({email : req.body.email});
+    let data = await Account.findOne({userId : req.body.userId});
     try {
         let pwd = await bcrypt.compare(req.body.password, data.password)
         if(pwd){
             let password = await bcrypt.hash(req.body.changepassword, 10)
-            let response = await Account.updateOne({email:req.body.email},{$set:{password:password}})
+            let response = await Account.updateOne({userId:req.body.userId},{$set:{password:password}})
             resp.status(200).json({result:true,data:"change complete"})
         } else {
             resp.status(401).json({result:false,data:"Password Error"})
@@ -56,11 +56,11 @@ router.post("/register", async (req, resp) => {
     let password = await bcrypt.hash(req.body.password, 10)
     try {
         let response = await Account.create({
-            email: req.body.email,
+            userId: req.body.userId,
             password: password,
             name: req.body.name,
         });
-        const token = jwt.sign({email:response.email},process.env.SECRET_KEY,{expiresIn: "14d"})
+        const token = jwt.sign({userId:response.userId},process.env.SECRET_KEY,{expiresIn: "14d"})
         resp.json({ result: true,result:response,token });
     } catch (e) {
         resp.status(401).json({ result: false,message:e })
@@ -72,14 +72,14 @@ router.post("/register", async (req, resp) => {
 // 회원탈퇴
 
 router.delete("/delete", async(req,resp)=>{
-    let data = await Account.findOne({email : req.body.email});
+    let data = await Account.findOne({userId : req.body.userId});
     try {
         let pwd = await bcrypt.compare(req.body.password, data.password)
         if(pwd){
-            let response = await Account.deleteOne({email:req.body.email});
-            await Todo.deleteMany({writer:req.body.email});
-            await Challeange.deleteMany({createUser:req.body.email});
-            await Data.deleteMany({image:{$regex:req.body.email}})
+            let response = await Account.deleteOne({userId:req.body.userId});
+            await Todo.deleteMany({writer:req.body.userId});
+            await Challeange.deleteMany({createUser:req.body.userId});
+            await Data.deleteMany({image:{$regex:req.body.userId}})
             
             if(fs.existsSync(`public/${username}`)){
                 fs.rmSync(`public/${username}`,{ recursive: true, force: true })
@@ -102,7 +102,7 @@ router.post("/valid", async (req, resp) => {
     console.log(req.body);
     try{
         const data = jwt.verify(req.body.token,process.env.SECRET_KEY);
-        resp.status(200).json({result:true, owner:data.email})
+        resp.status(200).json({result:true, owner:data.userId})
     } catch(e){
         resp.status(401).json({result:false})
     }
