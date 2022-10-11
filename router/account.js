@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import Todo from "../model/todo.js"
 import Challeange from "../model/challenge.js"
-import Data from "../model/data.js"
+import Data from "../model/data.js";
 const router = express.Router();
 dotenv.config();
 
@@ -19,12 +19,12 @@ router.post("/auth", async (req, resp) => {
         if (pwd) {
             //===========================================================
             const token = jwt.sign({userId:response.userId},process.env.SECRET_KEY,{expiresIn: "14d"})
-            resp.json({ result: true,message:response,token })
+            resp.json({ registered: true,data:response,token })
         } else {
-            resp.json({ result: false,message:"password error" })
+            resp.json({ registered: false,data:"password error" })
         }
     } else {
-        resp.json({ result: false })
+        resp.json({ registered: false })
     }
 
 
@@ -55,13 +55,15 @@ router.put("/changepassword",async(req,resp)=>{
 router.post("/register", async (req, resp) => {
     let password = await bcrypt.hash(req.body.password, 10)
     try {
+        console.log(req.body);
         let response = await Account.create({
             userId: req.body.userId,
             password: password,
             name: req.body.name,
         });
+        console.log(response);
         const token = jwt.sign({userId:response.userId},process.env.SECRET_KEY,{expiresIn: "14d"})
-        resp.json({ result: true,result:response,token });
+        resp.json({ type: true,data:response,token });
     } catch (e) {
         resp.status(401).json({ result: false,message:e })
     }
@@ -71,24 +73,20 @@ router.post("/register", async (req, resp) => {
 
 // 회원탈퇴
 
-router.delete("/delete", async(req,resp)=>{
-    let data = await Account.findOne({userId : req.body.userId});
+router.post("/deleteid", async(req,resp)=>{
     try {
-        let pwd = await bcrypt.compare(req.body.password, data.password)
-        if(pwd){
             let response = await Account.deleteOne({userId:req.body.userId});
             await Todo.deleteMany({writer:req.body.userId});
             await Challeange.deleteMany({createUser:req.body.userId});
             await Data.deleteMany({image:{$regex:req.body.userId}})
             
-            if(fs.existsSync(`public/${username}`)){
-                fs.rmSync(`public/${username}`,{ recursive: true, force: true })
+            if(fs.existsSync(`public/${req.body.userId}`)){
+                fs.rmSync(`public/${req.body.userId}`,{ recursive: true, force: true })
             }
             resp.status(200).json({result:true,data:"Data deleted"})
-        } else {
-            resp.status(401).json({result:false,data:"Password Error"})
-        }
+
     } catch(e) {
+        console.log(e);
         resp.status(401).json({result:false})
     }
 
@@ -99,10 +97,11 @@ router.delete("/delete", async(req,resp)=>{
 
 //토큰 유효성 검사 
 router.post("/valid", async (req, resp) => {
-    console.log(req.body);
     try{
-        const data = jwt.verify(req.body.token,process.env.SECRET_KEY);
-        resp.status(200).json({result:true, owner:data.userId})
+        const data = jwt.verify(req.body.token.token,process.env.SECRET_KEY);
+        const response = await Account.findOne({userId:data.userId});
+
+        resp.status(200).json({result:true, data:response})
     } catch(e){
         resp.status(401).json({result:false})
     }

@@ -72,8 +72,14 @@ router.get("/readonechallenge", async(req,resp)=>{
 // 챌린지 시간 수정 하기 
 router.put("/updatechallenge", async(req,resp)=>{
     try{
-        let response = await Challenge.updateOne({"_id":req.body.id},
-        {$set:{hournotification:req.body.hournotification}})
+        let response;
+        if(req.body.isnotification == true){
+            response = await Challenge.updateOne({"_id":req.body.id},
+            {$set:{hournotification:req.body.hournotification}})
+        } else {
+            response = await Challenge.updateOne({"_id":req.body.id},
+            {$set:{isnotification:req.body.isnotification}})
+        }
         resp.json({type:true,data:response});
     }catch(e){
         resp.json({type:false})

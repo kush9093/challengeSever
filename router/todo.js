@@ -8,6 +8,7 @@ const router = express.Router();
 // auth token check middelware
 router.use((req, resp, next) => {
     const authorization = req.get("Authorization");
+    console.log("Author",authorization)
     if (!authorization || !authorization.startsWith("Bearer")) {
         return resp.status(401).json({ result: false, message: "unauthorized error" })
     }
@@ -27,12 +28,13 @@ router.use((req, resp, next) => {
 
 // todo 생성
 router.post("/addtodo", async (req, resp) => {
-    const obj = { comment: req.body.comment, isEnd: false, writer: req.body.writer };
+    const obj = { todoText: req.body.todoText, ing: false, writer: req.body.writer };
     try {
         let response = await Todo.create(obj);
         console.log(response)
         resp.json({ type: true, result: response })
     } catch (e) {
+        console.log(e);
         resp.json({ type: false, result: e });
     }
 })
@@ -50,8 +52,8 @@ router.post("/getalltodo",async (req,resp)=>{
 // 완료여부에따라 todo 불러오기
 router.post("/getcompletedtodo",async (req,resp)=>{
     try {
-        let response = await Todo.find({$and:[{writer:req.body.writer},{isEnd:req.body.isend}]}).sort("createAt").lean();
-        resp.json({type:true,result:response})
+        let response = await Todo.find({$and:[{writer:req.body.writer},{ing:req.body.ing}]}).sort("createAt").lean();
+        resp.json({type:true,data:response})
     } catch(e){
         resp.json({type:false,result:e});
     }
