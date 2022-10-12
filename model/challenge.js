@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 
 const challengeSchema = new mongoose.Schema({
-    createAt : {type: Date,default: Date.now()},
+    createdAt : {type: Date,default: Date.now()},
     title : String,
     createUser : String,
     isnotification : Boolean,
+    checked: String,
     hournotification : String,
-    isEnd : {type:Boolean,default:false},
+    isEnd : {type:String,default:"ing"},
 },{
     toObject:{
         virtuals:true

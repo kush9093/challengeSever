@@ -43,11 +43,16 @@ router.post("/adddata",async (req,resp)=>{
  const filename = `public/${username}/${Date.now()+Math.floor(Math.random()*10)}.png`
  fs.writeFile(filename, dataBuffer, async function(err) {
  if(err){
- resp.json(err);
+    resp.status(401).json({type:false,result:err});
  }else{
-const data = {day:day,targetId:targetId,image:filename,emoji:emoji,comment:comment}
-  const response = await Data.create(data);
-  resp.json(response);
+const data = {day:day,targetId:targetId,image:filename,emoji:emoji,comment:comment,createUser:username}
+try{
+    const response = await Data.create(data);
+    resp.json({type:true,result:response});
+} catch(e){
+    resp.status(401).json({type:false,result:e})
+}
+  
  }
  });
 })

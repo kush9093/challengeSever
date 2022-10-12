@@ -2,6 +2,8 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import Challenge from "../model/challenge.js";
+import Data from "../model/data.js";
+import fs from "fs";
 
 const router = express.Router();
 
@@ -37,6 +39,7 @@ router.post("/addchallenge",async (req,resp)=>{
             title:req.body.title,
             createUser:req.body.userId,
             isnotification : req.body.isnotification,
+            checked:req.body.checked,
             hournotification : req.body.hournotification,
         })
         resp.json({type:true,result:response})
@@ -45,13 +48,13 @@ router.post("/addchallenge",async (req,resp)=>{
     }
 })
 
-// 챌린지 전체 불러오기
-router.get("/readchallenge", async(req,resp)=>{
+// 챌린지 전체 불러오기(진행여부에따라)
+router.post("/readchallenge", async(req,resp)=>{
     try{
-        let response = await Challenge.find({createUser:req.query.userId}).populate("data").sort("-createAt").lean();
+        let response = await Challenge.find({$and:[{createUser:req.body.userId},{isEnd:req.body.isEnd}]}).populate("data").sort("-createdAt").lean();
         resp.json({type:true,result:response});
     } catch(e) {
-        resp.json({type:false})
+        resp.json({type:false,result:e})
     }
 
 })
@@ -91,12 +94,17 @@ router.put("/updatechallenge", async(req,resp)=>{
 
 
 // 챌린지 삭제
-router.delete("/deletechallenge",async(req,resp)=>{
+router.post("/deletechallenge",async(req,resp)=>{
     try{
+        let linkdata = await Data.find({targetId:req.body.id})
+        linkdata.forEach((elm)=>{
+            fs.unlinkSync(elm.image)
+        })
+        await Data.deleteMany({targetId:req.body.id})
         let response = await Challenge.deleteOne({_id:req.body.id}).lean()
         resp.json({type:true,result:"deleted challenge"});
     } catch(e) {
-        resp.json({type:false})
+        resp.status(401).json({type:false,result:e})
     }
 })
 
