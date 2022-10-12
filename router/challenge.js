@@ -61,12 +61,12 @@ router.post("/readchallenge", async(req,resp)=>{
 
 
 // 챌린지 하나 불러오기 
-router.get("/readonechallenge", async(req,resp)=>{
+router.post("/readonechallenge", async(req,resp)=>{
     try{
-        let response = await Challenge.find({"_id":req.query.id}).populate("data").lean();
+        let response = await Challenge.find({"_id":req.body.id}).populate("data").lean();
         resp.json({type:true,result:response});
     } catch(e) {
-        resp.json({type:false})
+        resp.json({type:false,result:e})
     }
 
 })

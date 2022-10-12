@@ -59,6 +59,7 @@ try{
 
 // 데이터 수정
 router.put("/updatedata", async(req,resp)=>{
+    console.log(req.body);
     try{
         let response;
         if(req.body.comment !== null && req.body.emoji !== null){
@@ -97,9 +98,9 @@ router.get("/getdata", async(req,resp)=>{
 })
 
 // 데이터 전체 불러오기
-router.get("/getalldata",async(req,resp)=>{
+router.post("/getalldata",async(req,resp)=>{
     try {
-        let response = await Data.find({targetId:req.query.targetId}).sort("day").lean();
+        let response = await Data.find({createUser:req.body.userId}).sort("-createAt").lean();
         resp.json({type:true,result:response});
     } catch(e){
         resp.json({type:false});
