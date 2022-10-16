@@ -78,12 +78,16 @@ router.put("/updatechallenge", async(req,resp)=>{
         let response;
         if(req.body.isnotification == true){
             response = await Challenge.updateOne({"_id":req.body.id},
-            {$set:{hournotification:req.body.hournotification}})
+            {$set:{hournotification:req.body.hournotification,isnotification:req.body.isnotification}})
         } else {
             response = await Challenge.updateOne({"_id":req.body.id},
             {$set:{isnotification:req.body.isnotification}})
         }
-        resp.json({type:true,data:response});
+        if(response.acknowledged===false){
+            resp.json({type:false})
+        } else {
+            resp.json({type:true,data:response});
+        }
     }catch(e){
         resp.json({type:false})
     }
