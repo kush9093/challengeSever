@@ -5,7 +5,7 @@ const challengeSchema = new mongoose.Schema({
     title : String,
     createUser : String,
     isnotification : Boolean,
-    checked: String,
+    checked: Boolean,
     hournotification : String,
     isEnd : {type:String,default:"ing"},
 },{

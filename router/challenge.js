@@ -51,7 +51,7 @@ router.post("/addchallenge",async (req,resp)=>{
 // 챌린지 전체 불러오기(진행여부에따라)
 router.post("/readchallenge", async(req,resp)=>{
     try{
-        let response = await Challenge.find({$and:[{createUser:req.body.userId},{isEnd:req.body.isEnd}]}).populate("data").sort("-createdAt").lean();
+        let response = await Challenge.find({$and:[{createUser:req.body.userId}]}).populate("data").sort("-createdAt").lean();
         resp.json({type:true,result:response});
     } catch(e) {
         resp.json({type:false,result:e})
@@ -78,10 +78,10 @@ router.put("/updatechallenge", async(req,resp)=>{
         let response;
         if(req.body.isnotification == true){
             response = await Challenge.updateOne({"_id":req.body.id},
-            {$set:{hournotification:req.body.hournotification,isnotification:req.body.isnotification}})
+            {$set:{hournotification:req.body.hournotification,isnotification:req.body.isnotification,checked:req.body.checked}})
         } else {
             response = await Challenge.updateOne({"_id":req.body.id},
-            {$set:{isnotification:req.body.isnotification}})
+            {$set:{isnotification:req.body.isnotification,checked:req.body.checked}})
         }
         if(response.acknowledged===false){
             resp.json({type:false})
